@@ -52,9 +52,9 @@ func newETCDRegistry(config *Config) *etcdv3Registry {
 	if config.logger == nil {
 		config.logger = xlog.JupiterLogger
 	}
-	config.logger = config.logger.With(xlog.FieldMod(ecode.ModRegistryETCD), xlog.FieldAddrAny(config.Config.Endpoints))
+	config.logger = config.logger.With(xlog.FieldMod(ecode.ModRegistryETCD))
 	reg := &etcdv3Registry{
-		client: config.Config.Build(),
+		client: config.client,
 		Config: config,
 		kvs:    sync.Map{},
 		leases: make(map[string]clientv3.LeaseID),

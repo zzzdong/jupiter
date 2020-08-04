@@ -38,16 +38,15 @@ func RawConfig(key string) *Config {
 		xlog.Panic("unmarshal key", xlog.FieldMod("registry.etcd"), xlog.FieldErrKind(ecode.ErrKindUnmarshalConfigErr), xlog.FieldErr(err), xlog.String("key", key), xlog.Any("config", config))
 	}
 	// 解析嵌套配置
-	if err := conf.UnmarshalKey(key, &config.Config); err != nil {
-		xlog.Panic("unmarshal key", xlog.FieldMod("registry.etcd"), xlog.FieldErrKind(ecode.ErrKindUnmarshalConfigErr), xlog.FieldErr(err), xlog.String("key", key), xlog.Any("config", config))
-	}
+	// if err := conf.UnmarshalKey(key, &config.Config); err != nil {
+	// 	xlog.Panic("unmarshal key", xlog.FieldMod("registry.etcd"), xlog.FieldErrKind(ecode.ErrKindUnmarshalConfigErr), xlog.FieldErr(err), xlog.String("key", key), xlog.Any("config", config))
+	// }
 	return config
 }
 
 // DefaultConfig ...
 func DefaultConfig() *Config {
 	return &Config{
-		Config:      etcdv3.DefaultConfig(),
 		ReadTimeout: time.Second * 3,
 		Prefix:      "jupiter",
 		logger:      xlog.JupiterLogger,
@@ -57,18 +56,28 @@ func DefaultConfig() *Config {
 
 // Config ...
 type Config struct {
-	*etcdv3.Config
 	ReadTimeout time.Duration
 	ConfigKey   string
 	Prefix      string
 	ServiceTTL  time.Duration
 	logger      *xlog.Logger
+	client      *etcdv3.Client
+}
+
+func (config *Config) WithETCDV3Client(client *etcdv3.Client) *Config {
+	config.client = client
+	return config
 }
 
 // Build ...
 func (config Config) Build() registry.Registry {
-	if config.ConfigKey != "" {
-		config.Config = etcdv3.RawConfig(config.ConfigKey)
+	if config.client == nil {
+		// initialize client from config
+		etcdv3ClientConfig := etcdv3.DefaultConfig()
+		if config.ConfigKey != "" {
+			etcdv3ClientConfig = etcdv3.RawConfig(config.ConfigKey)
+		}
+		config.client = etcdv3ClientConfig.Build()
 	}
 	return newETCDRegistry(&config)
 }
