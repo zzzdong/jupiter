@@ -280,7 +280,7 @@ func (app *Application) Stop() (err error) {
 				app.cycle.Run(s.Stop)
 			}(s)
 		}
-		app.smu.RUnlock()
+		app.smu.RUnlock()j
 
 		//stop workers
 		for _, w := range app.workers {

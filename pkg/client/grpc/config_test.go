@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package grpc
+package grpc_test
 
 import (
 	"bytes"
@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/douyu/jupiter/pkg/client/grpc"
 	"github.com/douyu/jupiter/pkg/conf"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,7 +35,7 @@ func TestConfig(t *testing.T) {
 	assert.Nil(t, conf.LoadFromReader(bytes.NewBufferString(configStr), toml.Unmarshal))
 
 	t.Run("std config", func(t *testing.T) {
-		config := StdConfig("test")
+		config := grpc.StdConfig("test")
 		assert.Equal(t, "swr", config.BalancerName)
 		assert.Equal(t, time.Second*10, config.DialTimeout)
 		assert.Equal(t, "127.0.0.1:9091", config.Address)
