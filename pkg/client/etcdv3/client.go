@@ -18,10 +18,11 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/coreos/etcd/clientv3/concurrency"
 	"io/ioutil"
 	"strings"
 	"time"
+
+	"github.com/coreos/etcd/clientv3/concurrency"
 
 	"github.com/douyu/jupiter/pkg/ecode"
 
@@ -32,7 +33,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// Client ...
+// Client wraps etcdv3 client, and add some util function
 type Client struct {
 	*clientv3.Client
 	config *Config

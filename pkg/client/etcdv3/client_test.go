@@ -2,32 +2,49 @@ package etcdv3
 
 import (
 	"context"
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/clientv3/concurrency"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/coreos/etcd/clientv3"
+	"github.com/coreos/etcd/clientv3/concurrency"
+	mock_clientv3 "github.com/douyu/jupiter/pkg/client/etcdv3/mock"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
-func Test_GetKeyValue(t *testing.T) {
-	config := DefaultConfig()
-	config.Endpoints = []string{"127.0.0.1:2379"}
-	config.TTL = 5
-	etcdCli := newClient(config)
+func Test_GetAndPut(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
 
-	ctx := context.TODO()
+	mockKV := mock_clientv3.NewMockKV(controller)
+	mockLease := mock_clientv3.NewMockLease(controller)
 
-	leaseSession, err := etcdCli.GetLeaseSession(ctx, concurrency.WithTTL(int(config.TTL)))
-	assert.Nil(t, err)
-	defer leaseSession.Close()
+	client := &Client{
+		Client: &clientv3.Client{
+			KV:    mockKV,
+			Lease: mockLease,
+		},
+	}
 
-	_, err = etcdCli.Client.KV.Put(ctx, "/test/key", "{...}", clientv3.WithLease(leaseSession.Lease()))
-	assert.Nil(t, err)
+	t.Run("get with key", func(t *testing.T) {
+		mockKV.EXPECT().Get(context.Background(), "/test/key").Return("value1")
 
-	keyValue, err := etcdCli.GetKeyValue(ctx, "/test/key")
-	assert.Nil(t, err)
+		kv, err := client.GetKeyValue(context.Background(), "/test/key")
+		assert.Nil(t, err)
+		assert.Equal(t, "value1", string(kv.Value))
+	})
 
-	assert.Equal(t, string(keyValue.Value), "{...}")
+	t.Run("get with prefix", func(t *testing.T) {
+
+	})
+
+	t.Run("get with lease", func(t *testing.T) {
+
+	})
+
+	t.Run("put with lease", func(t *testing.T) {
+
+	})
 }
 
 func Test_MutexLock(t *testing.T) {
