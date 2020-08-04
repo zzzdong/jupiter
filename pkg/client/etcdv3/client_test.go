@@ -7,6 +7,8 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/concurrency"
+	"github.com/coreos/etcd/etcdserver/etcdserverpb"
+	"github.com/coreos/etcd/mvcc/mvccpb"
 	mock_clientv3 "github.com/douyu/jupiter/pkg/client/etcdv3/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +29,17 @@ func Test_GetAndPut(t *testing.T) {
 	}
 
 	t.Run("get with key", func(t *testing.T) {
-		mockKV.EXPECT().Get(context.Background(), "/test/key").Return("value1")
+		mockKV.EXPECT().Get(context.Background(), "/test/key").Return(&clientv3.GetResponse{
+			Header: &etcdserverpb.ResponseHeader{
+				ClusterId: 0,
+				MemberId:  0,
+				Revision:  0,
+				RaftTerm:  0,
+			},
+			Kvs:   []*mvccpb.KeyValue{{Key: []byte("/test/key"), Value: []byte("value1")}},
+			More:  false,
+			Count: 1,
+		}, error(nil))
 
 		kv, err := client.GetKeyValue(context.Background(), "/test/key")
 		assert.Nil(t, err)
