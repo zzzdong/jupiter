@@ -94,7 +94,7 @@ jobs:
           fi
 
       - name: Test all/cmd/demo/main.go
-        run: go run example/all/cmd/demo/main.go
+        run: go run example/all/cmd/demo/main.go --config example/all/config/config.toml
 
       - name: Test client/etcd/main.go
         run: go run example/client/etcd/main.go --config example/client/etcd/config.toml
