@@ -67,9 +67,7 @@ jobs:
 
       - name: Build
         run: go build -v .
-jobs:
-
-  build:
+  example:
     name: Run Example
     runs-on: ubuntu-latest
     strategy:
